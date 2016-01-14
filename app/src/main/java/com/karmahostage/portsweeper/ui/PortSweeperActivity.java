@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -11,11 +12,14 @@ import android.widget.Button;
 import com.karmahostage.portsweeper.R;
 import com.karmahostage.portsweeper.infrastructure.ForApplication;
 import com.karmahostage.portsweeper.infrastructure.ui.PortSweeperBaseActivity;
+import com.karmahostage.portsweeper.scanning.model.Host;
+import com.karmahostage.portsweeper.scanning.model.HostDiscoveryResponse;
 import com.karmahostage.portsweeper.scanning.model.ScanTargetBuilder;
 import com.karmahostage.portsweeper.scanning.service.ScanService;
 import com.karmahostage.portsweeper.util.SystemUiHider;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -78,6 +82,14 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
             @Override
             public void onClick(View v) {
                 scanService.doScan(Arrays.asList(scanTargetBuilder.full("95.170.95.17")));
+                scanService.resolveNetworkHosts(new HostDiscoveryResponse() {
+                    @Override
+                    public void onResult(Set<Host> discoveredHosts) {
+                        for (Host host : discoveredHosts) {
+                            Log.i("PSW", String.format("Found host: %s | %s | %s", host.getHostName(), host.getIpAddress(), host.getStatus()    ));
+                        }
+                    }
+                });
             }
         });
 
