@@ -25,6 +25,7 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
         this.hostDiscoveryResponse = hostDiscoveryResponse;
     }
 
+
     @Override
     protected Set<Host> doInBackground(Void... params) {
         Optional<InetAddress> localhost = getLocalAddress();
@@ -36,35 +37,46 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
                 Optional<InetAddress> address = getRemoteAddress(createSubnetAddress(myIp, (byte) i));
                 if (address.isPresent()) {
                     try {
-                        if (address.get().isReachable(1000)) {
+                        if (address.get().isReachable(30)) {
+                            Host discoveredHost = new Host()
+                                    .setIp(address.get().getAddress())
+                                    .setHostName(address.get().getHostName())
+                                    .setIpAddress(address.get().getHostAddress())
+                                    .setStatus(HostStatus.ONLINE);
                             discoveredHosts.add(
-                                    new Host()
-                                            .setIp(address.get().getAddress())
-                                            .setHostName(address.get().getHostName())
-                                            .setIpAddress(address.get().getHostAddress())
-                                            .setStatus(HostStatus.ONLINE)
+                                    discoveredHost
                             );
-
-                            Log.d("PSW", String.format("%s was reachable", address.get().getHostAddress()));
-
+                            hostDiscoveryResponse.onResult(discoveredHost);
+                            //NbtAddress.getAllByName("")[Ø] //but catch exception! :) Can be done in a post-discovery step
                         } else if (isFoundInDnsLookup(address.get())) {
+                            Host discoveredHost = new Host()
+                                    .setIp(address.get().getAddress())
+                                    .setHostName(address.get().getHostName())
+                                    .setIpAddress(address.get().getHostAddress())
+                                    .setStatus(HostStatus.OFFLINE);
                             discoveredHosts.add(
-                                    new Host()
-                                            .setIp(address.get().getAddress())
-                                            .setHostName(address.get().getHostName())
-                                            .setIpAddress(address.get().getHostAddress())
-                                            .setStatus(HostStatus.OFFLINE)
+                                    discoveredHost
                             );
                             Log.d("PSW", String.format("%s was not reachable, but found in dns records", address.get().getHostAddress()));
+                            hostDiscoveryResponse.onResult(discoveredHost);
                         }
                     } catch (Exception ex) {
                         Log.d("PSW", String.format("%s was not reachable", address.get().getHostAddress()));
+                    } finally {
+                        publishProgress((int)(((float)i/256)*100));
                     }
                 }
             }
 
         }
         return discoveredHosts;
+    }
+
+    @Override
+    protected void onProgressUpdate(Integer... values) {
+        if (hostDiscoveryResponse != null) {
+            hostDiscoveryResponse.onProgressUpdate(values[0]);
+        }
     }
 
     private boolean isFoundInDnsLookup(InetAddress address) {
@@ -99,11 +111,5 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
         } catch (Exception ex) {
             return Optional.absent();
         }
-    }
-
-    @Override
-    protected void onPostExecute(Set<Host> hosts) {
-        super.onPostExecute(hosts);
-        hostDiscoveryResponse.onResult(hosts);
     }
 }

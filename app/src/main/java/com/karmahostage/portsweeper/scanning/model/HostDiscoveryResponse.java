@@ -1,7 +1,7 @@
 package com.karmahostage.portsweeper.scanning.model;
 
-import java.util.Set;
-
 public interface HostDiscoveryResponse {
-    void onResult(Set<Host> discoveredHosts);
+    void onResult(Host discoveredHosts);
+
+    void onProgressUpdate(Integer value);
 }

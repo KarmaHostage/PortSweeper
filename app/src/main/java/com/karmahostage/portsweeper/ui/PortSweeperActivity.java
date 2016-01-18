@@ -7,7 +7,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.karmahostage.portsweeper.R;
 import com.karmahostage.portsweeper.infrastructure.ForApplication;
@@ -18,17 +21,13 @@ import com.karmahostage.portsweeper.scanning.model.ScanTargetBuilder;
 import com.karmahostage.portsweeper.scanning.service.ScanService;
 import com.karmahostage.portsweeper.util.SystemUiHider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- *
- * @see SystemUiHider
- */
 public class PortSweeperActivity extends PortSweeperBaseActivity {
 
     /**
@@ -67,6 +66,13 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
     @ForApplication
     ScanTargetBuilder scanTargetBuilder;
 
+    private ArrayAdapter<String> ipListAdapter;
+
+    private List<String> ipAddresses = new ArrayList<>();
+
+    private ProgressBar progressBar;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -77,21 +83,42 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
         final View controlsView = findViewById(R.id.fullscreen_content_controls);
         final View contentView = findViewById(R.id.fullscreen_content);
 
+        this.ipListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, ipAddresses);
+
+        final ListView ipListView = (ListView) findViewById(R.id.listView);
+        ipListView.setAdapter(ipListAdapter);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
         final Button scanButton = (Button) findViewById(R.id.btnScan);
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                scanService.doScan(Arrays.asList(scanTargetBuilder.full("95.170.95.17")));
+                progressBar.setProgress(0);
+                clearIps();
                 scanService.resolveNetworkHosts(new HostDiscoveryResponse() {
                     @Override
-                    public void onResult(Set<Host> discoveredHosts) {
-                        for (Host host : discoveredHosts) {
-                            Log.i("PSW", String.format("Found host: %s | %s | %s", host.getHostName(), host.getIpAddress(), host.getStatus()    ));
-                        }
+                    public void onResult(final Host discoveredHosts) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                addIpToList(discoveredHosts.getIpAddress());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onProgressUpdate(final Integer value) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setProgress(value);
+                            }
+                        });
                     }
                 });
             }
         });
+
 
         // Set up an instance of SystemUiHider to control the system UI for
         // this activity.
@@ -194,6 +221,16 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    private void clearIps() {
+        this.ipAddresses.clear();
+        ipListAdapter.notifyDataSetChanged();
+    }
+
+    private void addIpToList(String ip) {
+        this.ipAddresses.add(ip);
+        ipListAdapter.notifyDataSetChanged();
     }
 
 }

@@ -1,14 +1,17 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:background="#0099cc" tools:context=".PortSweeper">
+    android:layout_height="match_parent" android:background="#09c4a5" tools:context=".PortSweeper">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
-    <TextView android:id="@+id/fullscreen_content" android:layout_width="match_parent"
+    <ImageView android:id="@+id/fullscreen_content" android:layout_width="wrap_content"
         android:layout_height="match_parent" android:keepScreenOn="true" android:textColor="#33b5e5"
         android:textStyle="bold" android:textSize="50sp" android:gravity="center"
-        android:text="@string/dummy_content" />
+        android:text="@string/dummy_content"
+        android:src="@drawable/qds_mini_logo_new"
+        android:scaleType="center"
+        android:layout_gravity="right" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
@@ -21,11 +24,42 @@
             android:background="@color/black_overlay" android:orientation="horizontal"
             tools:ignore="UselessParent">
 
-            <Button android:id="@+id/btnScan" style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:text="@string/btn_scan" />
-
         </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="right|center_vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="left|top">
+
+                <Button android:id="@+id/btnScan" style="?metaButtonBarButtonStyle"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:text="@string/btn_scan"
+                    android:allowUndo="true"
+                    android:layout_alignParentBottom="true" />
+
+                <ListView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/listView"
+                    android:layout_above="@+id/btnScan"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="false"
+                    android:layout_below="@+id/progressBar" />
+
+                <ProgressBar
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/progressBar"
+                    android:layout_alignParentTop="true" />
+            </RelativeLayout>
+        </FrameLayout>
+
     </FrameLayout>
 
 </FrameLayout>
