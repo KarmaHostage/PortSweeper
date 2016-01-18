@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -22,9 +21,7 @@ import com.karmahostage.portsweeper.scanning.service.ScanService;
 import com.karmahostage.portsweeper.util.SystemUiHider;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -66,9 +63,9 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
     @ForApplication
     ScanTargetBuilder scanTargetBuilder;
 
-    private ArrayAdapter<String> ipListAdapter;
+    private ArrayAdapter<Host> ipListAdapter;
 
-    private List<String> ipAddresses = new ArrayList<>();
+    private List<Host> ipAddresses = new ArrayList<>();
 
     private ProgressBar progressBar;
 
@@ -83,7 +80,7 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
         final View controlsView = findViewById(R.id.fullscreen_content_controls);
         final View contentView = findViewById(R.id.fullscreen_content);
 
-        this.ipListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, ipAddresses);
+        this.ipListAdapter = new IpListAdapter(this, android.R.layout.simple_list_item_1, ipAddresses);
 
         final ListView ipListView = (ListView) findViewById(R.id.listView);
         ipListView.setAdapter(ipListAdapter);
@@ -101,7 +98,7 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                addIpToList(discoveredHosts.getIpAddress());
+                                addIpToList(discoveredHosts);
                             }
                         });
                     }
@@ -228,7 +225,7 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
         ipListAdapter.notifyDataSetChanged();
     }
 
-    private void addIpToList(String ip) {
+    private void addIpToList(Host ip) {
         this.ipAddresses.add(ip);
         ipListAdapter.notifyDataSetChanged();
     }

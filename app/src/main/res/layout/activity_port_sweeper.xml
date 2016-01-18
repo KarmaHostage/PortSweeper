@@ -1,6 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:background="#09c4a5" tools:context=".PortSweeper">
+    android:layout_height="match_parent"
+    tools:context=".PortSweeper">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
@@ -40,7 +41,8 @@
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:layout_weight="1" android:text="@string/btn_scan"
                     android:allowUndo="true"
-                    android:layout_alignParentBottom="true" />
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/background_material_dark" />
 
                 <ListView
                     android:layout_width="fill_parent"
@@ -49,7 +51,8 @@
                     android:layout_above="@+id/btnScan"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="false"
-                    android:layout_below="@+id/progressBar" />
+                    android:layout_below="@+id/progressBar"
+                    android:background="@color/background_floating_material_dark" />
 
                 <ProgressBar
                     style="?android:attr/progressBarStyleHorizontal"

@@ -12,9 +12,12 @@ import com.karmahostage.portsweeper.scanning.model.HostStatus;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import jcifs.netbios.NbtAddress;
 
 public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
 
@@ -40,18 +43,22 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
                         if (address.get().isReachable(30)) {
                             Host discoveredHost = new Host()
                                     .setIp(address.get().getAddress())
-                                    .setHostName(address.get().getHostName())
                                     .setIpAddress(address.get().getHostAddress())
-                                    .setStatus(HostStatus.ONLINE);
+                                    .setStatus(Arrays.equals(address.get().getAddress(), myIp) ? HostStatus.SELF : HostStatus.ONLINE);
                             discoveredHosts.add(
                                     discoveredHost
                             );
+                            try {
+                                NbtAddress nbtAddress = NbtAddress.getAllByAddress(discoveredHost.getIpAddress())[0];
+                                discoveredHost.setHostName(nbtAddress.getHostName());
+                            } catch (Exception ex) {
+                                //silently fail on the hostname
+                            }
                             hostDiscoveryResponse.onResult(discoveredHost);
                             //NbtAddress.getAllByName("")[Ø] //but catch exception! :) Can be done in a post-discovery step
                         } else if (isFoundInDnsLookup(address.get())) {
                             Host discoveredHost = new Host()
                                     .setIp(address.get().getAddress())
-                                    .setHostName(address.get().getHostName())
                                     .setIpAddress(address.get().getHostAddress())
                                     .setStatus(HostStatus.OFFLINE);
                             discoveredHosts.add(

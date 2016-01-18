@@ -4,8 +4,9 @@ public class Host {
 
     private byte[] ip;
     private String ipAddress;
-    private String hostName;
+    private String hostName = "";
     private HostStatus status;
+    private String macAddress;
 
     public byte[] getIp() {
         return ip;
@@ -40,6 +41,15 @@ public class Host {
 
     public Host setStatus(HostStatus status) {
         this.status = status;
+        return this;
+    }
+
+    public String getMacAddress() {
+        return macAddress;
+    }
+
+    public Host setMacAddress(String macAddress) {
+        this.macAddress = macAddress;
         return this;
     }
 }
