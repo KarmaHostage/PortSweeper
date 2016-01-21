@@ -9,11 +9,15 @@ import com.karmahostage.portsweeper.scanning.model.Host;
 import com.karmahostage.portsweeper.scanning.model.HostDiscoveryResponse;
 import com.karmahostage.portsweeper.scanning.model.HostStatus;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +35,28 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
 
     @Override
     protected Set<Host> doInBackground(Void... params) {
+        BufferedReader br = null;
+        String output = "";
+        //TODO: integrate this
+     /*   try {
+
+            String sCurrentLine;
+
+            br = new BufferedReader(new FileReader("/proc/net/arp"));
+
+            while ((sCurrentLine = br.readLine()) != null) {
+                output += (sCurrentLine);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null)br.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }*/
         Optional<InetAddress> localhost = getLocalAddress();
         if (localhost.isPresent()) {
             InetAddress inetAddress = localhost.get();
@@ -50,14 +76,16 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
         Optional<InetAddress> address = getRemoteAddress(createSubnetAddress(myIp, (byte) i));
         if (address.isPresent()) {
             try {
-                if (address.get().isReachable(30)) {
+                Process exec = Runtime.getRuntime().exec(String.format("ping -c 1  -w 1 %s", address.get().getHostName()));
+                int returnVaue = exec.waitFor();
+                if (returnVaue == 0) {
                     Host discoveredHost = new Host()
                             .setIp(address.get().getAddress())
                             .setIpAddress(address.get().getHostAddress())
                             .setStatus(Arrays.equals(address.get().getAddress(), myIp) ? HostStatus.SELF : HostStatus.ONLINE);
                     discoveredHosts.add(
                             discoveredHost
-                    );
+                       );
                     try {
                         NbtAddress nbtAddress = NbtAddress.getAllByAddress(discoveredHost.getIpAddress())[0];
                         discoveredHost.setHostName(nbtAddress.getHostName());
@@ -82,7 +110,7 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
                 if (isCancelled()) {
                     publishProgress(0);
                 } else {
-                    publishProgress((int)((i /256)*100));
+                    publishProgress((int)((i /254)*100));
                 }
             }
         }

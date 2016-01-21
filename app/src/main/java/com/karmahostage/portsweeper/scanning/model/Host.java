@@ -1,6 +1,8 @@
 package com.karmahostage.portsweeper.scanning.model;
 
-public class Host {
+import java.io.Serializable;
+
+public class Host implements Serializable {
 
     private byte[] ip;
     private String ipAddress;
