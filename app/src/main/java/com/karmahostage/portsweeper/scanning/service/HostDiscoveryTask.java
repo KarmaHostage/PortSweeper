@@ -37,46 +37,55 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
             byte[] myIp = inetAddress.getAddress();
 
             for (int i = 1; i <= 254; i++) {
-                Optional<InetAddress> address = getRemoteAddress(createSubnetAddress(myIp, (byte) i));
-                if (address.isPresent()) {
-                    try {
-                        if (address.get().isReachable(30)) {
-                            Host discoveredHost = new Host()
-                                    .setIp(address.get().getAddress())
-                                    .setIpAddress(address.get().getHostAddress())
-                                    .setStatus(Arrays.equals(address.get().getAddress(), myIp) ? HostStatus.SELF : HostStatus.ONLINE);
-                            discoveredHosts.add(
-                                    discoveredHost
-                            );
-                            try {
-                                NbtAddress nbtAddress = NbtAddress.getAllByAddress(discoveredHost.getIpAddress())[0];
-                                discoveredHost.setHostName(nbtAddress.getHostName());
-                            } catch (Exception ex) {
-                                //silently fail on the hostname
-                            }
-                            hostDiscoveryResponse.onResult(discoveredHost);
-                            //NbtAddress.getAllByName("")[Ø] //but catch exception! :) Can be done in a post-discovery step
-                        } else if (isFoundInDnsLookup(address.get())) {
-                            Host discoveredHost = new Host()
-                                    .setIp(address.get().getAddress())
-                                    .setIpAddress(address.get().getHostAddress())
-                                    .setStatus(HostStatus.OFFLINE);
-                            discoveredHosts.add(
-                                    discoveredHost
-                            );
-                            Log.d("PSW", String.format("%s was not reachable, but found in dns records", address.get().getHostAddress()));
-                            hostDiscoveryResponse.onResult(discoveredHost);
-                        }
-                    } catch (Exception ex) {
-                        Log.d("PSW", String.format("%s was not reachable", address.get().getHostAddress()));
-                    } finally {
-                        publishProgress((int)(((float)i/256)*100));
-                    }
+                if (!isCancelled()) {
+                    searchForIp(myIp, i);
                 }
             }
 
         }
         return discoveredHosts;
+    }
+
+    private void searchForIp(byte[] myIp, float i) {
+        Optional<InetAddress> address = getRemoteAddress(createSubnetAddress(myIp, (byte) i));
+        if (address.isPresent()) {
+            try {
+                if (address.get().isReachable(30)) {
+                    Host discoveredHost = new Host()
+                            .setIp(address.get().getAddress())
+                            .setIpAddress(address.get().getHostAddress())
+                            .setStatus(Arrays.equals(address.get().getAddress(), myIp) ? HostStatus.SELF : HostStatus.ONLINE);
+                    discoveredHosts.add(
+                            discoveredHost
+                    );
+                    try {
+                        NbtAddress nbtAddress = NbtAddress.getAllByAddress(discoveredHost.getIpAddress())[0];
+                        discoveredHost.setHostName(nbtAddress.getHostName());
+                    } catch (Exception ex) {
+                        //silently fail on the hostname
+                    }
+                    hostDiscoveryResponse.onResult(discoveredHost);
+                } else if (isFoundInDnsLookup(address.get())) {
+                    Host discoveredHost = new Host()
+                            .setIp(address.get().getAddress())
+                            .setIpAddress(address.get().getHostAddress())
+                            .setStatus(HostStatus.OFFLINE);
+                    discoveredHosts.add(
+                            discoveredHost
+                    );
+                    Log.d("PSW", String.format("%s was not reachable, but found in dns records", address.get().getHostAddress()));
+                    hostDiscoveryResponse.onResult(discoveredHost);
+                }
+            } catch (Exception ex) {
+                Log.d("PSW", String.format("%s was not reachable", address.get().getHostAddress()));
+            } finally {
+                if (isCancelled()) {
+                    publishProgress(0);
+                } else {
+                    publishProgress((int)((i /256)*100));
+                }
+            }
+        }
     }
 
     @Override

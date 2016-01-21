@@ -1,9 +1,13 @@
 package com.karmahostage.portsweeper.scanning.service;
 
+import android.os.AsyncTask;
+
+import com.karmahostage.portsweeper.scanning.model.Host;
 import com.karmahostage.portsweeper.scanning.model.HostDiscoveryResponse;
 import com.karmahostage.portsweeper.scanning.model.ScanTarget;
 
 import java.util.List;
+import java.util.Set;
 
 public class ScanServiceImpl implements ScanService {
 
@@ -14,8 +18,8 @@ public class ScanServiceImpl implements ScanService {
     }
 
     @Override
-    public void resolveNetworkHosts(HostDiscoveryResponse hostDiscoveryResponse) {
-        new HostDiscoveryTask(hostDiscoveryResponse)
+    public AsyncTask<Void, Integer, Set<Host>> resolveNetworkHosts(HostDiscoveryResponse hostDiscoveryResponse) {
+        return new HostDiscoveryTask(hostDiscoveryResponse)
                 .execute();
     }
 }
