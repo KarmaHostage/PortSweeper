@@ -1,9 +1,11 @@
 package com.karmahostage.portsweeper.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -28,6 +30,7 @@ import javax.inject.Inject;
 public class PortSweeperActivity extends PortSweeperBaseActivity {
 
 
+    public static final String RESOLVED_IP = "com.karmahostage.portsweeper.PortSweeperActivity.resolvedIp";
     @Inject
     @ForApplication
     ScanService scanService;
@@ -56,6 +59,21 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
 
         final ListView ipListView = (ListView) findViewById(R.id.listView);
         ipListView.setAdapter(ipListAdapter);
+        ipListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (ipAddresses.get(position) != null) {
+                    Intent ipDetailActivity = new Intent(PortSweeperActivity.this, IpDetailActivity.class);
+                    ipDetailActivity.putExtra(RESOLVED_IP, ipAddresses.get(position));
+                    startActivity(ipDetailActivity);
+                }
+            }
+        });
+
+
+
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         scanButton = (Button) findViewById(R.id.btnScan);
 
@@ -122,8 +140,10 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
     }
 
     private void addIpToList(Host ip) {
-        this.ipAddresses.add(ip);
-        ipListAdapter.notifyDataSetChanged();
+        if (!this.ipAddresses.contains(ip)) {
+            this.ipAddresses.add(ip);
+            ipListAdapter.notifyDataSetChanged();
+        }
     }
 
 }

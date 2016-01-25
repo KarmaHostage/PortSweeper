@@ -1,5 +1,5 @@
 package com.karmahostage.portsweeper.scanning.model;
 
 public enum HostStatus {
-    ONLINE, OFFLINE, SELF
+    ONLINE, OFFLINE, SELF, ARP
 }

@@ -1,6 +1,8 @@
 package com.karmahostage.portsweeper.scanning.model;
 
-public class Host {
+import java.io.Serializable;
+
+public class Host implements Serializable {
 
     private byte[] ip;
     private String ipAddress;
@@ -51,5 +53,21 @@ public class Host {
     public Host setMacAddress(String macAddress) {
         this.macAddress = macAddress;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Host host = (Host) o;
+
+        return !(ipAddress != null ? !ipAddress.equals(host.ipAddress) : host.ipAddress != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return ipAddress != null ? ipAddress.hashCode() : 0;
     }
 }
