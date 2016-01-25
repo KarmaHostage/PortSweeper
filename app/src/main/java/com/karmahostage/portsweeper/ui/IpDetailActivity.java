@@ -68,7 +68,6 @@ public class IpDetailActivity extends PortSweeperBaseActivity {
                             upStatus.setText(isUp ? "Device is Up" : "Device is Down");
                         }
                     });
-
                 }
             });
         }

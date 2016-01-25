@@ -150,8 +150,10 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
     }
 
     private void addIpToList(Host ip) {
-        this.ipAddresses.add(ip);
-        ipListAdapter.notifyDataSetChanged();
+        if (!this.ipAddresses.contains(ip)) {
+            this.ipAddresses.add(ip);
+            ipListAdapter.notifyDataSetChanged();
+        }
     }
 
 }

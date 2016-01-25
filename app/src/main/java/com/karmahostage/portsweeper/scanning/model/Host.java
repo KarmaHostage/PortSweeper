@@ -54,4 +54,20 @@ public class Host implements Serializable {
         this.macAddress = macAddress;
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Host host = (Host) o;
+
+        return !(ipAddress != null ? !ipAddress.equals(host.ipAddress) : host.ipAddress != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return ipAddress != null ? ipAddress.hashCode() : 0;
+    }
 }
