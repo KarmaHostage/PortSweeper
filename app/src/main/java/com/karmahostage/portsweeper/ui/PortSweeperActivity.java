@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.karmahostage.portsweeper.R;
@@ -39,10 +40,9 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
 
     private List<Host> ipAddresses = new ArrayList<>();
 
-    private ProgressBar progressBar;
-
     private Button scanButton;
     private AsyncTask<Void, Integer, Set<Host>> networkHostResolver;
+    private TextView txtStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +51,11 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
 
         setContentView(R.layout.activity_port_sweeper);
 
+        this.txtStatus = (TextView) findViewById(R.id.txtStatus);
         this.ipListAdapter = new IpListAdapter(this, android.R.layout.simple_list_item_1, ipAddresses);
 
         final ListView ipListView = (ListView) findViewById(R.id.listView);
         ipListView.setAdapter(ipListAdapter);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         scanButton = (Button) findViewById(R.id.btnScan);
 
@@ -81,12 +81,10 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
             this.networkHostResolver.cancel(true);
             this.networkHostResolver = null;
             scanButton.setText(R.string.btn_scan);
-            setMyProgress(0);
         }
     }
 
     private void startScanning(final Context c) {
-        setMyProgress(0);
         clearIps();
         this.networkHostResolver = scanService.resolveNetworkHosts(new HostDiscoveryResponse() {
             @Override
@@ -101,31 +99,22 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
             }
 
             @Override
-            public void onProgressUpdate(final Integer value) {
+            public void onProgressUpdate(final String value) {
                 setMyProgress(value);
             }
         });
         scanButton.setText(R.string.btn_scanning);
     }
 
-    private void setMyProgress(final Integer value) {
+    private void setMyProgress(final String value) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (value == 100) {
-                    if (scanButton != null) {
-                        PortSweeperActivity.this.scanButton.setText(getText(R.string.btn_scan));
-                    }
-                } else {
-                    if (networkHostResolver == null) {
-                        progressBar.setProgress(0);
-                    } else {
-                        progressBar.setProgress(value);
-                    }
-                }
+                txtStatus.setText(value);
             }
         });
     }
+
 
     private void clearIps() {
         this.ipAddresses.clear();

@@ -78,20 +78,7 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
                 }
             } catch (Exception ex) {
                 Log.d("PSW", String.format("%s was not reachable", address.get().getHostAddress()));
-            } finally {
-                if (isCancelled()) {
-                    publishProgress(0);
-                } else {
-                    publishProgress((int)((i /256)*100));
-                }
             }
-        }
-    }
-
-    @Override
-    protected void onProgressUpdate(Integer... values) {
-        if (hostDiscoveryResponse != null) {
-            hostDiscoveryResponse.onProgressUpdate(values[0]);
         }
     }
 

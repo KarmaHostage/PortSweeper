@@ -24,21 +24,35 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="left|top">
 
-                    <ProgressBar
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="fill_parent"
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/progressBar"
-                        android:layout_alignParentTop="true" />
+                        android:id="@+id/linearLayout">
+
+                        <ProgressBar
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/progressBar2" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:text="Medium Text"
+                            android:id="@+id/txtStatus"
+                            android:layout_gravity="center_vertical" />
+                    </LinearLayout>
+
 
                     <ListView
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/listView"
-                        android:layout_above="@+id/btnScan"
+                        android:layout_below="@+id/linearLayout"
                         android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="false"
-                        android:layout_below="@+id/progressBar" />
+                        android:layout_alignParentStart="true"
+                        android:layout_above="@+id/btnScan" />
 
                     <Button android:id="@+id/btnScan" style="?metaButtonBarButtonStyle"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
