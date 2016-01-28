@@ -25,6 +25,11 @@ public class HostPingTask extends AsyncTask<Host, Integer, HostPingResult> {
             this.result = new HostPingResult(hostToScan);
             for (int i = 0; i < 10; i++) {
                 scanHost(hostToScan);
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             return result;
         } else {

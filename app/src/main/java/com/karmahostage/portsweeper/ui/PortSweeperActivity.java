@@ -46,6 +46,7 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
     private Button scanButton;
     private AsyncTask<Void, Integer, Set<Host>> networkHostResolver;
     private TextView txtStatus;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,7 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (ipAddresses.get(position) != null) {
+                    stopScanning();
                     Intent ipDetailActivity = new Intent(PortSweeperActivity.this, IpDetailActivity.class);
                     ipDetailActivity.putExtra(RESOLVED_IP, ipAddresses.get(position));
                     startActivity(ipDetailActivity);
@@ -70,11 +72,7 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
             }
         });
 
-
-
-
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
+        this.progressBar = (ProgressBar)findViewById(R.id.progressBar2);
         scanButton = (Button) findViewById(R.id.btnScan);
 
         final Context c = this;
@@ -99,11 +97,13 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
             this.networkHostResolver.cancel(true);
             this.networkHostResolver = null;
             scanButton.setText(R.string.btn_scan);
+            this.progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
     private void startScanning(final Context c) {
         clearIps();
+        this.progressBar.setVisibility(View.VISIBLE);
         this.networkHostResolver = scanService.resolveNetworkHosts(new HostDiscoveryResponse() {
             @Override
             public void onResult(final Host discoveredHosts) {
@@ -111,7 +111,7 @@ public class PortSweeperActivity extends PortSweeperBaseActivity {
                     @Override
                     public void run() {
                         addIpToList(discoveredHosts);
-                        Toast.makeText(c, R.string.found_host, Toast.LENGTH_SHORT);
+                        Toast.makeText(c, R.string.found_host, Toast.LENGTH_SHORT).show();
                     }
                 });
             }

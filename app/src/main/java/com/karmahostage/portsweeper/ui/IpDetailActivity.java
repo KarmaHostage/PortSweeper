@@ -1,7 +1,9 @@
 package com.karmahostage.portsweeper.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.karmahostage.portsweeper.R;
@@ -29,6 +31,7 @@ public class IpDetailActivity extends PortSweeperBaseActivity {
     private TextView title;
 
     private TextView upStatus;
+    private Button btnDevicePing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +55,15 @@ public class IpDetailActivity extends PortSweeperBaseActivity {
             }
         });
 
-
+        this.btnDevicePing = (Button)findViewById(R.id.btnDevicePing);
+        this.btnDevicePing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ipDetailActivity = new Intent(IpDetailActivity.this, PingActivity.class);
+                ipDetailActivity.putExtra(RESOLVED_IP, resolvedIp);
+                startActivity(ipDetailActivity);
+            }
+        });
     }
 
     private void fetchResolvedIp() {

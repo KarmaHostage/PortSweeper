@@ -9,6 +9,9 @@ import com.karmahostage.portsweeper.scanning.model.Host;
 import com.karmahostage.portsweeper.scanning.model.HostDiscoveryResponse;
 import com.karmahostage.portsweeper.scanning.model.HostStatus;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -68,15 +71,17 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
         String[] split = readProcArp().split("\n");
         for (String entry : split) {
             try {
-                Matcher matcher = pattern.matcher(entry);
-                if (matcher.find()) {
-                    String extractedIp = matcher.group();
-                    arpDiscoveredHosts.add(
-                            new Host()
-                                    .setIpAddress(extractedIp)
-                                    .setIp(InetAddress.getByName(extractedIp).getAddress())
-                                    .setStatus(HostStatus.ONLINE)
-                    );
+                if (entry.contains("0x02")) {
+                    Matcher matcher = pattern.matcher(entry);
+                    if (matcher.find()) {
+                        String extractedIp = matcher.group();
+                        arpDiscoveredHosts.add(
+                                new Host()
+                                        .setIpAddress(extractedIp)
+                                        .setIp(InetAddress.getByName(extractedIp).getAddress())
+                                        .setStatus(HostStatus.ONLINE)
+                        );
+                    }
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -87,6 +92,7 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
 
     @Override
     protected Set<Host> doInBackground(Void... params) {
+        this.hostDiscoveryResponse.onProgressUpdate("Starting ARP-Scan");
         this.arpThreadPool = Executors.newFixedThreadPool(4);
         findMachinesBasedOnArpScan();
         this.arpThreadPool.shutdown();
@@ -95,6 +101,7 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        this.hostDiscoveryResponse.onProgressUpdate("ARP-Scan Finished, Starting full (slower) scan");
         this.scanningThreadPool = Executors.newFixedThreadPool(4);
         findMachinesBasedOnLocalIp();
         this.scanningThreadPool.shutdown();
@@ -103,7 +110,7 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        publishProgress(100);
+        this.hostDiscoveryResponse.onProgressUpdate("Finished scanning for nearby hosts");
         return discoveredHosts;
     }
 
@@ -149,14 +156,8 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
                         }
                 );
 
-            for (int i = 1; i <= 254; i++) {
-                if (!isCancelled()) {
-                    searchForIp(myIp, i);
-                }
             }
-
         }
-        return discoveredHosts;
     }
 
     private void searchForIp(final byte[] ipToLookFor) {
@@ -166,6 +167,7 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
                 Process exec = Runtime.getRuntime().exec(String.format("ping -c 1  -W 1 %s", address.get().getHostName()));
                 Log.d("PSW", "pinging " + address.get().getHostName());
                 int returnValue = exec.waitFor();
+                exec.destroy();
                 if (returnValue == 0) {
                     Host discoveredHost = new Host()
                             .setIp(address.get().getAddress())
@@ -196,14 +198,6 @@ public class HostDiscoveryTask extends AsyncTask<Void, Integer, Set<Host>> {
                 ex.printStackTrace();
                 Log.d("PSW", String.format("%s was not reachable", address.get().getHostAddress()));
             }
-        }
-    }
-
-
-    @Override
-    protected void onProgressUpdate(Integer... values) {
-        if (hostDiscoveryResponse != null) {
-            hostDiscoveryResponse.onProgressUpdate(values[0]);
         }
     }
 
